@@ -1,0 +1,31 @@
+version: '3'
+services:
+    
+    backend:
+        build:
+            context: backend
+            dockerfile: build/Dockerfile
+        entrypoint: bash entrypoint.sh
+        volumes:
+            - ./backend/src/:/usr/src/app/
+        ports:
+            - "8000:8000"
+        env_file:
+            - .env
+        depends_on:
+            - "backend-db"
+
+    backend-db:
+        image: postgres:12.0-alpine
+        volumes:
+            - "backend_postgres_data:${POSTGRES_DATA}"
+        env_file:
+            - .env
+        ports:
+            - "5433:5433"
+        command: -p 5433
+    
+volumes:
+    backend_postgres_data:
+
+
