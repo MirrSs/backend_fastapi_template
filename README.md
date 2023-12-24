@@ -16,3 +16,5 @@ To run project using **kubernetes**, you need **minikube** and **kubectl** insta
 
 In *build/kubernetes* directory use:
 >   kubectl apply -f .
+
+Also you need to configure your dns file to make requests to an ingress hostname.
