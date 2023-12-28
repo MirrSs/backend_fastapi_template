@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: db
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: postgres:12.0-alpine
+        envFrom:
+          - configMapRef:
+              name: fastapi-main-env
+        ports:
+          - containerPort: 5432
+        resources: { }
+      restartPolicy: Always

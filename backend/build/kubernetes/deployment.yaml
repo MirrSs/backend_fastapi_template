@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: fastapi-main
+  name: fastapi-main
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fastapi-main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: fastapi-main
+    spec:
+      containers:
+        - command:
+              - bash
+              - entrypoint.sh
+          name: fastapi-main
+          image: mirrss/fastapi_template:latest
+          envFrom:
+            - configMapRef:
+                name: fastapi-main-env
+          ports:
+            - containerPort: 8000
+          resources: { }
+      restartPolicy: Always
+
