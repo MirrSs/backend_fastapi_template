@@ -19,6 +19,9 @@ spec:
       containers:
       - name: db
         image: postgres:12.0-alpine
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-pv-claim
         envFrom:
           - configMapRef:
               name: fastapi-main-env
@@ -26,3 +29,7 @@ spec:
           - containerPort: 5432
         resources: { }
       restartPolicy: Always
+      volumes:
+      - name: postgres-pv-claim
+        persistentVolumeClaim:
+          claimName: postgres-pv-claim

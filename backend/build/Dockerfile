@@ -10,9 +10,9 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update \
     && apt-get -y install libpq-dev gcc
 
-COPY ../Pipfile ../Pipfile.lock ./
+COPY ./backend/Pipfile ./backend/Pipfile.lock ./
 
-COPY ../src .
+COPY ./backend/src .
 
 EXPOSE 8000
 
