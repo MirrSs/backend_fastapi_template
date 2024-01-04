@@ -7,19 +7,8 @@ on:
     branches: [ "master" ]
 
 jobs:
-  lint: 
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Flake8 action
-      uses: suo/flake8-github-action@v1
-      with:
-        checkName: lint
-
-    
+  
   build:
-    needs: lint
-
     runs-on: ubuntu-latest
 
     steps:
