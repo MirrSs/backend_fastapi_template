@@ -3,12 +3,15 @@ from sqlalchemy import update, delete
 from sqlalchemy.future import select
 from exceptions.exception import ObjectNotFoundError
 from models.user_model import User
-from passlib import hash
 from sqlalchemy.ext.asyncio.session import AsyncSession
+from fastapi import File
+from loguru import logger
+from passlib import hash
 from schemas.user_schema import CreateUserSchema
-
+from services.minio_service import MinioService
 
 class UserManager:
+
     @classmethod
     async def create(cls, data: CreateUserSchema, session: AsyncSession):
         password = hash.bcrypt.hash(data.password)
@@ -16,6 +19,26 @@ class UserManager:
         session.add(user)
         await session.commit()
         return user
+    
+    @classmethod
+    async def update_profile_image(cls, user_id:int, image:File, session:AsyncSession):
+        new_file_name = f'{image.filename}:user_{user_id}'
+        q = update(User).where(User.id == user_id)
+        q = q.values(profile_picture_url=new_file_name)
+        q.execution_options(synchronize_session="fetch")
+        await session.execute(q)
+        await session.commit()
+        q = await session.execute(select(User).where(User.id == user_id))
+        result = q.scalar_one_or_none()
+        if not result:
+            raise ObjectNotFoundError(detail="User not found")
+        
+        msg, status_code = MinioService.upload_file(
+            file=image,
+            object_name=new_file_name
+        )
+        logger.info(msg)
+        return result
 
     @classmethod
     async def get_all(cls, session: AsyncSession) -> List[User]:
