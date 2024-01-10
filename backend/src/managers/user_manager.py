@@ -22,7 +22,7 @@ class UserManager:
     
     @classmethod
     async def update_profile_image(cls, user_id:int, image:File, session:AsyncSession):
-        new_file_name = f'{image.filename}:user_{user_id}'
+        new_file_name = f'user_{user_id}'
         q = update(User).where(User.id == user_id)
         q = q.values(profile_picture_url=new_file_name)
         q.execution_options(synchronize_session="fetch")

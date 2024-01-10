@@ -1,17 +1,19 @@
+from urllib.parse import urlsplit, urlunsplit
 from botocore.exceptions import ClientError
 from fastapi import status
 from loguru import logger
 from utils import check_user_image_extension
 from minio import Minio
 from minio.error import S3Error
-from settings import MINIO_USER_IMAGE_BUCKET_NAME, MINIO_ACCESS_KEY,MINIO_SECRET_KEY
+from typing import Optional
+import datetime
+from settings import MINIO_USER_IMAGE_BUCKET_NAME
 
 class MinioService:
 
     client = Minio("minio:9000",
-        access_key=MINIO_ACCESS_KEY,
-        secret_key=MINIO_SECRET_KEY,
-        secure=False
+        secure=False,
+        region='us-east-1'
     )
 
     @classmethod
@@ -52,16 +54,19 @@ class MinioService:
         else:
             print("Bucket", MINIO_USER_IMAGE_BUCKET_NAME, "already exists")
 
-        # Upload the file, renaming it in the process
-        cls.client.put_object(
-            MINIO_USER_IMAGE_BUCKET_NAME,
-            object_name,
-            file.file,
-            length=file.size
-        )
-
-        msg = f"FILE {file.filename} successfully uploaded as {object_name}"
+        msg = f"File upload error! Send only .jpg or .png"
         status_code = status.HTTP_201_CREATED
+        # Upload the file, renaming it in the process
+        if check_user_image_extension(file.filename):
+            cls.client.put_object(
+                MINIO_USER_IMAGE_BUCKET_NAME,
+                object_name,
+                file.file,
+                length=file.size
+            )
+
+            msg = f"FILE {file.filename} successfully uploaded as {object_name}"
+            status_code = status.HTTP_201_CREATED
         return msg, status_code
 
     @classmethod
@@ -74,9 +79,11 @@ class MinioService:
         try:
             response = cls.client.presigned_get_object(
                         'default-bucket',
-                        object_name=object_name,
+                        object_name=object_name
                     )
         except ClientError as err:
             logger.error(err)
             return ''
         return response
+
+
