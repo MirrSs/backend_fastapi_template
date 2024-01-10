@@ -1,5 +1,6 @@
-from pydantic import BaseModel
-
+from pydantic import BaseModel, validator
+from models.user_model import User
+from services.minio_service import MinioService
 
 class CreateUserSchema(BaseModel):
     name: str
@@ -7,7 +8,7 @@ class CreateUserSchema(BaseModel):
     password: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CreateUserOutputSchema(BaseModel):
@@ -15,7 +16,6 @@ class CreateUserOutputSchema(BaseModel):
     name: str
     email: str
     is_admin: bool
-
     class Config:
         from_attributes = True
 
@@ -25,9 +25,15 @@ class GetUserSchema(BaseModel):
     name: str
     email: str
     is_admin: bool
+    profile_picture_url: str
 
+    @validator('profile_picture_url', always=True)
+    def presigned_url(cls, value, values: dict):
+        if value != '' or value is not None:
+            return MinioService.create_presigned_url(value)
+        
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class GetByEmailSchema(BaseModel):
