@@ -15,6 +15,8 @@ class CreateUserOutputSchema(BaseModel):
     name: str
     email: str
     is_admin: bool
+    is_active: bool
+    is_banned: bool
     class Config:
         from_attributes = True
 
@@ -23,7 +25,11 @@ class GetUserSchema(BaseModel):
     id: int
     name: str
     email: str
+    
     is_admin: bool
+    is_active: bool
+    is_banned: bool
+
     profile_picture_url: str | None
 
     @field_validator('profile_picture_url')
@@ -35,13 +41,6 @@ class GetUserSchema(BaseModel):
     class Config:
         from_attributes = True
         
-    class Config:
-        from_attributes = True
-
-
-class GetByEmailSchema(BaseModel):
-    email: str
-
 
 class PatchUserSchema(BaseModel):
     name: str | None = None
