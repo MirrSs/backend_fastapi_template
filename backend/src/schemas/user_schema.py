@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from services.minio_service import MinioService
 
 class CreateUserSchema(BaseModel):
@@ -24,12 +24,16 @@ class GetUserSchema(BaseModel):
     name: str
     email: str
     is_admin: bool
-    profile_picture_url: str
+    profile_picture_url: str | None
 
-    @validator('profile_picture_url', always=True)
-    def presigned_url(cls, value, values: dict):
-        if value != '' or value is not None:
-            return MinioService.create_presigned_url(value)
+    @field_validator('profile_picture_url')
+    @classmethod
+    def presigned_url(cls, v):
+        if v != None:
+            return MinioService.create_presigned_url(v)
+        return ''
+    class Config:
+        from_attributes = True
         
     class Config:
         from_attributes = True

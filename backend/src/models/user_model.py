@@ -21,4 +21,4 @@ class User(db.Base):
         return ''
 
     def verify_password(self, password: str):
-        return hash.bcrypt.verify(password, self.hashed_password)
+        return hash.bcrypt.verify(password, self.password)
