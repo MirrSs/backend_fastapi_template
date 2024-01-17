@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.auth_schema import TokensSchema
 from services.auth_service import AuthService
+from services.email_service import EmailService
 
 auth_router = APIRouter(tags=["auth"])
 
@@ -38,3 +39,13 @@ async def obtain_pair_of_tokens_by_refresh_token(
     )
     response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
     return TokensSchema(access_token=access_token, refresh_token=refresh_token)
+
+
+@auth_router.get('/confirm/{token}')
+async def confirm_registration(
+        token,
+        session: AsyncSession = Depends(get_session)
+) -> Response:
+    return Response(
+        await EmailService.confirm_user(token=token, session=session)
+    )

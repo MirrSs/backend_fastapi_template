@@ -16,6 +16,7 @@ kafka-python = "*"
 passlib = "*"
 python-multipart = "*"
 pillow = "*"
+minio = "*"
 
 [dev-packages]
 

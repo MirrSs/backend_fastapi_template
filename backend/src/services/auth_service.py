@@ -68,7 +68,7 @@ class AuthService:
     ) -> User | HTTPException:
         """Check whether there is a user in the database and a password is valid."""
         password = user_data.pop("password")
-        user = await UserManager.get_by_email(
+        user = await UserManager.retrieve(
             email=user_data.get("email"), session=session
         )
         if user and user.verify_password(password=password):
@@ -121,7 +121,7 @@ class AuthService:
     ):
         user_id = cls.decode_token(token=access_token)
 
-        user = await UserManager.get_by_id(session=session, user_id=user_id)
+        user = await UserManager.retrieve(id=user_id, session=session)
         return user
 
     @classmethod

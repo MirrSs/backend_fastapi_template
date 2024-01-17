@@ -24,8 +24,31 @@ services:
         ports:
             - "5433:5433"
         command: -p 5433
+
+    minio:
+        image: docker.io/bitnami/minio:2022
+        ports:
+            - '9000:9000'
+            - '9001:9001'
+        volumes:
+            - 'minio_data:/data'
+        env_file:
+            - .env
+
+    smtp:
+        build:
+            context: backend
+            dockerfile: build/Dockerfile
+        entrypoint: bash smtp-entrypoint.sh
+        ports:
+            - "1025:1025"
+        env_file:
+            - .env
+
     
 volumes:
     backend_postgres_data:
+    minio_data:
+
 
 
