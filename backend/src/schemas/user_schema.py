@@ -1,5 +1,4 @@
 from pydantic import BaseModel, validator
-from models.user_model import User
 from services.minio_service import MinioService
 
 class CreateUserSchema(BaseModel):
@@ -43,3 +42,4 @@ class GetByEmailSchema(BaseModel):
 class PatchUserSchema(BaseModel):
     name: str | None = None
     email: str | None = None
+    password: str | None = None
