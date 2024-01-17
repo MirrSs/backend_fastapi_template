@@ -9,7 +9,7 @@ class User(db.Base):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True)
     email = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
     name = sqlalchemy.Column(sqlalchemy.String)
-    hashed_password = sqlalchemy.Column(sqlalchemy.String)
+    password = sqlalchemy.Column(sqlalchemy.String)
     is_admin = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
 
     profile_picture_url = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=True)
@@ -21,4 +21,4 @@ class User(db.Base):
         return ''
 
     def verify_password(self, password: str):
-        return hash.bcrypt.verify(password, self.hashed_password)
+        return hash.bcrypt.verify(password, self.password)

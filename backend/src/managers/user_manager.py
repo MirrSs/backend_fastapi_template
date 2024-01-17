@@ -1,93 +1,32 @@
-from typing import List, Optional
-from sqlalchemy import update, delete
-from sqlalchemy.future import select
-from exceptions.exception import ObjectNotFoundError
-from models.user_model import User
-from sqlalchemy.ext.asyncio.session import AsyncSession
-from fastapi import File
-from loguru import logger
+from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from passlib import hash
-from schemas.user_schema import CreateUserSchema
-from services.minio_service import MinioService
+from db.mixins.base_mixin import TableType
+from managers.crud_manager import CRUDManager
+from models.user_model import User
+from schemas.user_schema import CreateUserSchema, PatchUserSchema
 
-class UserManager:
 
-    @classmethod
-    async def create(cls, data: CreateUserSchema, session: AsyncSession):
-        password = hash.bcrypt.hash(data.password)
-        user = User(name=data.name, email=data.email, hashed_password=password)
-        session.add(user)
-        await session.commit()
-        return user
-    
-    @classmethod
-    async def update_profile_image(cls, user_id:int, image:File, session:AsyncSession):
-        new_file_name = f'user_{user_id}'
-        q = update(User).where(User.id == user_id)
-        q = q.values(profile_picture_url=new_file_name)
-        q.execution_options(synchronize_session="fetch")
-        await session.execute(q)
-        await session.commit()
-        q = await session.execute(select(User).where(User.id == user_id))
-        result = q.scalar_one_or_none()
-        if not result:
-            raise ObjectNotFoundError(detail="User not found")
-        
-        msg, status_code = MinioService.upload_file(
-            file=image,
-            object_name=new_file_name
-        )
-        logger.info(msg)
-        return result
+class UserManager(CRUDManager):
+    table = User
+    create_scheme = CreateUserSchema
+    update_scheme = PatchUserSchema
 
     @classmethod
-    async def get_all(cls, session: AsyncSession) -> List[User]:
-        q = await session.execute(select(User))
-        result = q.scalars().all()
-        if not result:
-            raise ObjectNotFoundError(detail="Users not found")
-        return result
-
-    @classmethod
-    async def get_by_email(cls, email: Optional[str], session: AsyncSession) -> User:
-        q = await session.execute(select(User).where(User.email == email))
-        result = q.scalar_one_or_none()
-        if not result:
-            raise ObjectNotFoundError(detail="User not found")
-        return result
+    async def create(
+            cls,
+            input_data: CreateUserSchema,
+            session: AsyncSession,
+    ) -> TableType:
+        input_data.password = hash.bcrypt.hash(input_data.password)
+        return await super().create(input_data, session)
 
     @classmethod
     async def update(
-        cls,
-        user_id: int,
-        name: Optional[str],
-        email: Optional[str],
-        session: AsyncSession,
-    ):
-        q = update(User).where(User.id == user_id)
-        if name:
-            q = q.values(name=name)
-        if email:
-            q = q.values(email=email)
-        q.execution_options(synchronize_session="fetch")
-        await session.execute(q)
-        await session.commit()
-        q = await session.execute(select(User).where(User.id == user_id))
-        result = q.scalar_one_or_none()
-        if not result:
-            raise ObjectNotFoundError(detail="User not found")
-        return result
-
-    @classmethod
-    async def get_by_id(cls, user_id: int, session: AsyncSession):
-        q = await session.execute(select(User).where(User.id == user_id))
-        result = q.scalar_one_or_none()
-        if not result:
-            raise ObjectNotFoundError(detail="User not found")
-        return result
-
-    @classmethod
-    async def delete_user(cls, user_id, session: AsyncSession):
-        q = await session.execute(delete(User).where(User.id == user_id))
-        await session.commit()
-        return {"detail": f"User: {user_id} deleted"}
+            cls, session: AsyncSession,
+            pk: int,
+            input_data: PatchUserSchema | dict
+    ) -> TableType | HTTPException:
+        if input_data.get('password'):  # todo make it better
+            input_data.password = hash.bcrypt.hash(input_data.password)
+        return await super().update(session, pk, input_data)
