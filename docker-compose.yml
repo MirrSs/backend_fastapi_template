@@ -35,6 +35,16 @@ services:
         env_file:
             - .env
 
+    smtp:
+        build:
+            context: backend
+            dockerfile: build/Dockerfile
+        entrypoint: bash smtp-entrypoint.sh
+        ports:
+            - "1025:1025"
+        env_file:
+            - .env
+
     
 volumes:
     backend_postgres_data:

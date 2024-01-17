@@ -12,6 +12,7 @@ from managers.user_manager import UserManager
 from services.auth_service import AuthService
 from exceptions.exception import BadRequestError, ObjectNotFoundError
 from models.user_model import User
+from services.email_service import EmailService
 
 user_router = APIRouter(tags=["users"])
 
@@ -43,6 +44,11 @@ async def create_user(
 
     except ObjectNotFoundError:
         response = await UserManager.create(input_data=user, session=session)
+        confirmation_email = f'{EmailService.confirmation_letter}' \
+                             f' {await EmailService.generate_confirmation_url(receiver=user.email, session=session)}'
+        await EmailService.send_email(
+            receiver=user.email, message=confirmation_email
+        )
         return response
 
 

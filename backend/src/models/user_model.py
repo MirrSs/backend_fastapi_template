@@ -10,7 +10,10 @@ class User(db.Base):
     email = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
     name = sqlalchemy.Column(sqlalchemy.String)
     password = sqlalchemy.Column(sqlalchemy.String)
+    
     is_admin = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+    is_active = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+    is_banned = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
 
     profile_picture_url = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=True)
     
