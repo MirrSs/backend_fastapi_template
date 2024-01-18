@@ -1,12 +1,12 @@
 import sqlalchemy
-from db import db
+from models.base_model import BaseModel
 from sqlalchemy.orm import relationship
 from passlib import hash
 from services.minio_service import MinioService
 
-class User(db.Base):
+class User(BaseModel):
     __tablename__ = 'users'
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True)
+    
     email = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
     name = sqlalchemy.Column(sqlalchemy.String)
     password = sqlalchemy.Column(sqlalchemy.String)
@@ -25,3 +25,6 @@ class User(db.Base):
 
     def verify_password(self, password: str):
         return hash.bcrypt.verify(password, self.password)
+    
+    def __str__(self):
+        return self.email
