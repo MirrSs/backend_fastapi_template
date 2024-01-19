@@ -13,7 +13,7 @@ from services.auth_service import AuthService
 from services.email_service import EmailService
 from exceptions.exception import BadRequestError, ObjectNotFoundError
 from models.user_model import User
-from services.celery_service import send_registration_confirmation_letter, resize_and_upload_user_profile_image
+from services.celery_service import send_registration_confirmation_letter, upload_user_profile_image
 
 user_router = APIRouter(tags=["users"])
 
@@ -72,9 +72,16 @@ async def update_user_profile_image(
     session: AsyncSession = Depends(get_session),
 ) -> GetUserSchema:
     object_name = f'user_{user.id}'
-    resize_and_upload_user_profile_image.delay(object_name=object_name,file=file)
+    data = {
+            'file': await file.read(),
+            'name': file.filename,
+            'content_type':file.content_type,
+            'size': file.size,
+
+        }
+    upload_user_profile_image.delay(object_name=object_name,data=data)
     return await UserManager.update(
-        id=user.id, profile_image_url=object_name, session=session
+        pk=user.id, input_data={'profile_picture_url':object_name}, session=session
     )
 
 

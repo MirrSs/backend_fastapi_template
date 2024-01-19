@@ -46,3 +46,4 @@ class PatchUserSchema(BaseModel):
     name: str | None = None
     email: str | None = None
     password: str | None = None
+    profile_image_url: str | None = None
