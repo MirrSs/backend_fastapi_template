@@ -17,6 +17,8 @@ passlib = "*"
 python-multipart = "*"
 pillow = "*"
 minio = "*"
+celery = "*"
+redis = "*"
 
 [dev-packages]
 

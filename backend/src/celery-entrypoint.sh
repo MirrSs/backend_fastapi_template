@@ -1,0 +1,1 @@
+exec celery -A services.celery_service worker --loglevel=INFO

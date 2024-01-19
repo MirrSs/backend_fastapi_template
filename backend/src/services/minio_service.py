@@ -1,12 +1,8 @@
-from urllib.parse import urlsplit, urlunsplit
 from botocore.exceptions import ClientError
-from fastapi import status
+from fastapi import status, UploadFile
 from loguru import logger
 from utils import check_user_image_extension
 from minio import Minio
-from minio.error import S3Error
-from typing import Optional
-import datetime
 from settings import MINIO_USER_IMAGE_BUCKET_NAME
 
 class MinioService:
@@ -17,31 +13,10 @@ class MinioService:
     )
 
     @classmethod
-    def create_s3_bucket(cls, bucket_name: str, region: str = None) -> bool:
-        """Create AWS S3 bucket"""
-        try:
-            location = {'LocationConstraint': region}
-            cls.client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration=location)
-        except ClientError as err:
-            logger.error(err)
-            return False
-        return True
-
-    @classmethod
-    def get_all_s3_buckets(cls) -> list:
-        """Return all existing AWS S3 buckets"""
-        response = cls.client.list_buckets()
-        response_list = []
-        for bucket in response['Buckets']:
-            response_list.append(f'{bucket["Name"]}')
-        return response_list
-
-    @classmethod
-    def upload_file(cls, file, object_name: str = None) -> tuple[dict[str, str], int]:
+    def upload_file(cls, file, filename:str, size:int,content_type: str, object_name: str = None) -> tuple[dict[str, str], int]:
         """Upload a file to an S3 bucket
 
         :param file: File to upload
-        :param bucket: Defines bucket name
         :param object_name: S3 object name. If not specified then file_name is used
         :return: True if file was uploaded, else False
         """
@@ -56,16 +31,17 @@ class MinioService:
 
         msg = f"File upload error! Send only .jpg or .png"
         status_code = status.HTTP_201_CREATED
+        new_file = UploadFile(file=file,size=size,filename=filename)
         # Upload the file, renaming it in the process
-        if check_user_image_extension(file.filename):
+        if check_user_image_extension(filename):
             cls.client.put_object(
                 MINIO_USER_IMAGE_BUCKET_NAME,
                 object_name,
-                file.file,
-                length=file.size
+                new_file.file,
+                length=new_file.size
             )
 
-            msg = f"FILE {file.filename} successfully uploaded as {object_name}"
+            msg = f"FILE {filename} successfully uploaded as {object_name}"
             status_code = status.HTTP_201_CREATED
         return msg, status_code
 
