@@ -10,9 +10,10 @@ from schemas.user_schema import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from managers.user_manager import UserManager
 from services.auth_service import AuthService
+from services.email_service import EmailService
 from exceptions.exception import BadRequestError, ObjectNotFoundError
 from models.user_model import User
-from services.email_service import EmailService
+from services.celery_service import send_registration_confirmation_letter, resize_and_upload_user_profile_image
 
 user_router = APIRouter(tags=["users"])
 
@@ -46,9 +47,7 @@ async def create_user(
         response = await UserManager.create(input_data=user, session=session)
         confirmation_email = f'{EmailService.confirmation_letter}' \
                              f' {await EmailService.generate_confirmation_url(receiver=user.email, session=session)}'
-        await EmailService.send_email(
-            receiver=user.email, message=confirmation_email
-        )
+        send_registration_confirmation_letter.delay(email=user.email,message=confirmation_email)
         return response
 
 
@@ -72,8 +71,10 @@ async def update_user_profile_image(
     user: User = Depends(AuthService.get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> GetUserSchema:
-    return await UserManager.update_profile_image(
-        user_id=user.id, image=file, session=session
+    object_name = f'user_{user.id}'
+    resize_and_upload_user_profile_image.delay(object_name=object_name,file=file)
+    return await UserManager.update(
+        id=user.id, profile_image_url=object_name, session=session
     )
 
 

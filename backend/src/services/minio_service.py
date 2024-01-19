@@ -1,12 +1,8 @@
-from urllib.parse import urlsplit, urlunsplit
 from botocore.exceptions import ClientError
 from fastapi import status
 from loguru import logger
 from utils import check_user_image_extension
 from minio import Minio
-from minio.error import S3Error
-from typing import Optional
-import datetime
 from settings import MINIO_USER_IMAGE_BUCKET_NAME
 
 class MinioService:
@@ -41,7 +37,6 @@ class MinioService:
         """Upload a file to an S3 bucket
 
         :param file: File to upload
-        :param bucket: Defines bucket name
         :param object_name: S3 object name. If not specified then file_name is used
         :return: True if file was uploaded, else False
         """

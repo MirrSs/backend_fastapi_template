@@ -45,6 +45,25 @@ services:
         env_file:
             - .env
 
+    redis:
+        restart: unless-stopped
+        image: redis:latest
+        expose:
+            - 6379
+
+    celery:
+        build:
+            context: backend/
+            dockerfile: build/Dockerfile
+        entrypoint: bash celery-entrypoint.sh
+        volumes:
+            - ./backend/src/:/usr/src/app/
+        env_file:
+            - .env
+        depends_on:
+            - "backend"
+            - "redis"
+
     
 volumes:
     backend_postgres_data:

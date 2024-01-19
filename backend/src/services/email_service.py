@@ -13,7 +13,7 @@ class EmailService:
      """
 
     @classmethod
-    async def send_email(cls, receiver: str, message: str):
+    def send_email(cls, receiver: str, message: str):
         try:
             smtpObj = smtplib.SMTP(SMTP_ADDRESS, SMTP_PORT)
             smtpObj.sendmail(SENDER_EMAIL, receiver, message)
