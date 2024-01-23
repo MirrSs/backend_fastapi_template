@@ -1,6 +1,5 @@
 import sqlalchemy
 from models.base_model import BaseModel
-from sqlalchemy.orm import relationship
 from passlib import hash
 from services.minio_service import MinioService
 
