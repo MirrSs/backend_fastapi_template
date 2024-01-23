@@ -27,6 +27,7 @@ app.add_middleware(
 async def startup():
     # create db tables
     from models.user_model import User
+    from models.post_model import Post
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

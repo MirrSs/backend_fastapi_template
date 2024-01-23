@@ -20,7 +20,7 @@ In *build/kubernetes* directory use:
 
 Also you need to configure your dns file to make requests to an ingress hostname.
 
-To configure Prometheus and Grafana using Helm follow next steps:
+To configure **Prometheus** and **Grafana** using **Helm** follow next steps:
 
 >   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
@@ -42,5 +42,10 @@ To configure Prometheus and Grafana using Helm follow next steps:
 
 >   minikube service grafana-ext
 
-To get Grafana password use: 
+To get **Grafana** password use: 
 >   kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+**ALEMBIC**
+>   docker-compose exec backend alembic revision --autogenerate -m "some text" 
+
+>   docker-compose exec backend alembic upgrade head  
