@@ -23,7 +23,7 @@ async def get_current_user(
         user=Depends(AuthService.get_current_user),
         session: AsyncSession = Depends(get_session)
 ) -> GetUserSchema:
-    return await UserManager.retrieve(id=user.id, session=session)
+    return user
 
 
 @user_router.get('/users/{user_id}/', response_model=GetUserSchema)
