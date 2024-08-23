@@ -3,8 +3,8 @@ services:
     
     backend:
         build:
-            context: backend
-            dockerfile: build/Dockerfile
+            context: .
+            dockerfile: backend/build/Dockerfile
         entrypoint: bash entrypoint.sh
         volumes:
             - ./backend/src/:/usr/src/app/
@@ -37,8 +37,8 @@ services:
 
     smtp:
         build:
-            context: backend
-            dockerfile: build/Dockerfile
+            context: .
+            dockerfile: backend/build/Dockerfile
         entrypoint: bash smtp-entrypoint.sh
         ports:
             - "1025:1025"
@@ -53,8 +53,8 @@ services:
 
     celery:
         build:
-            context: backend/
-            dockerfile: build/Dockerfile
+            context: .
+            dockerfile: backend/build/Dockerfile
         entrypoint: bash celery-entrypoint.sh
         volumes:
             - ./backend/src/:/usr/src/app/
